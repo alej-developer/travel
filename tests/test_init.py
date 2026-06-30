@@ -306,6 +306,7 @@ class TestAppFactory:
                 "DATABASE_URL": "postgresql+asyncpg://user:pass@localhost:5432/testdb",
                 "SECRET_KEY": "a-very-secret-key-32chars!!!!!!!",
                 "DEBUG": "true",
+                "RATE_LIMIT_ENABLED": "false",
             },
         ):
             from travel.config import get_settings
@@ -323,6 +324,7 @@ class TestAppFactory:
                 "DATABASE_URL": "postgresql+asyncpg://user:pass@localhost:5432/testdb",
                 "SECRET_KEY": "a-very-secret-key-32chars!!!!!!!",
                 "DEBUG": "true",
+                "RATE_LIMIT_ENABLED": "false",
             },
         ):
             from travel.config import get_settings
@@ -342,6 +344,7 @@ class TestAppFactory:
                 "DATABASE_URL": "postgresql+asyncpg://user:pass@localhost:5432/testdb",
                 "SECRET_KEY": "a-very-secret-key-32chars!!!!!!!",
                 "DEBUG": "true",
+                "RATE_LIMIT_ENABLED": "false",
             },
         ):
             from travel.config import get_settings

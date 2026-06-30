@@ -85,6 +85,67 @@ class Settings(BaseSettings):
         description="Max simultaneous Playwright pages per worker process",
     )
 
+    # -------------------------------------------------------------------
+    # Security — CORS
+    # -------------------------------------------------------------------
+    allowed_origins: str = Field(
+        default="",
+        description=(
+            "Comma-separated list of allowed CORS origins. "
+            "Example: https://app.example.com,https://admin.example.com. "
+            "Wildcards (*) are NEVER permitted."
+        ),
+    )
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Return parsed, validated CORS origin list — never contains '*'."""
+        if not self.allowed_origins:
+            return []
+        origins = [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+        # Hard guard: reject any wildcard that slips through
+        return [o for o in origins if o != "*"]
+
+    # -------------------------------------------------------------------
+    # Security — Rate Limiting
+    # -------------------------------------------------------------------
+    rate_limit_global_requests: int = Field(
+        default=50,
+        ge=1,
+        description="Max requests per IP per minute (global endpoints)",
+    )
+    rate_limit_search_requests: int = Field(
+        default=5,
+        ge=1,
+        description="Max requests per IP per second (search/aggregation endpoints)",
+    )
+    rate_limit_enabled: bool = Field(
+        default=True,
+        description="Master switch — set to False in integration tests",
+    )
+
+    # -------------------------------------------------------------------
+    # Security — OWASP headers
+    # -------------------------------------------------------------------
+    security_hsts_max_age: int = Field(
+        default=31536000,  # 1 year in seconds
+        description="Strict-Transport-Security max-age in seconds",
+    )
+    security_csp: str = Field(
+        default=(
+            "default-src 'none'; "
+            "script-src 'self'; "
+            "style-src 'self'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        ),
+        description="Content-Security-Policy header value",
+    )
+
     @model_validator(mode="after")
     def validate_database_scheme(self) -> "Settings":
         scheme = self.database_url.scheme

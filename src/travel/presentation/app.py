@@ -1,7 +1,13 @@
 """FastAPI application factory.
 
-Call ``create_app()`` to get a configured FastAPI instance. The factory pattern
-allows easy test overrides (e.g. different settings or lifespan).
+Call ``create_app()`` to get a fully hardened FastAPI instance.
+
+Security layers (applied in order — outermost first):
+  1. SecurityHeadersMiddleware — OWASP headers on every response
+  2. RateLimitMiddleware       — Redis sliding-window rate limiting
+  3. CORSMiddleware            — explicit allowlist, no wildcards
+
+The factory pattern enables test overrides (custom settings, lifespan, etc.)
 """
 from __future__ import annotations
 
@@ -12,6 +18,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from travel.config import get_settings
+from travel.infrastructure.security.rate_limiter import RateLimitMiddleware
+from travel.infrastructure.security.security_headers import SecurityHeadersMiddleware
 from travel.presentation.api.v1.accommodations import router as accommodations_router
 from travel.presentation.api.v1.flights import router as flights_router
 from travel.presentation.api.v1.trains import router as trains_router
@@ -26,7 +34,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
-    """Create and return a fully configured FastAPI application."""
+    """Create and return a fully configured, security-hardened FastAPI application."""
     settings = get_settings()
 
     app = FastAPI(
@@ -36,21 +44,48 @@ def create_app() -> FastAPI:
             "from multiple providers."
         ),
         version="0.1.0",
-        docs_url="/docs",
-        redoc_url="/redoc",
-        openapi_url="/openapi.json",
+        # In production, disable docs unless explicitly enabled
+        docs_url="/docs" if settings.debug else None,
+        redoc_url="/redoc" if settings.debug else None,
+        openapi_url="/openapi.json" if settings.debug else None,
         lifespan=lifespan,
     )
 
     # -----------------------------------------------------------------------
-    # Middleware
+    # Middleware stack
     # -----------------------------------------------------------------------
+    # Note: Starlette middleware is applied in REVERSE order of registration.
+    # The LAST registered middleware is the OUTERMOST wrapper.
+    # Registration order below = execution order: SecurityHeaders → RateLimit → CORS
+
+    # ── 1. CORS — innermost: only runs after rate limit passes ─────────────
+    cors_origins = settings.cors_origins  # never contains '*'
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"] if settings.debug else [],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=cors_origins,
+        allow_credentials=bool(cors_origins),  # credentials only when origins are explicit
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "Accept",
+            "Origin",
+            "X-Request-ID",
+        ],
+        expose_headers=["X-Request-ID", "X-RateLimit-Policy", "Retry-After"],
+        max_age=600,  # preflight cache: 10 minutes
+    )
+
+    # ── 2. Rate Limiting ───────────────────────────────────────────────────
+    app.add_middleware(
+        RateLimitMiddleware,
+        redis_url=settings.redis_url,
+    )
+
+    # ── 3. Security Headers — outermost: wraps all responses ───────────────
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        force_hsts=not settings.debug,  # only force HSTS in production
     )
 
     # -----------------------------------------------------------------------
@@ -62,9 +97,14 @@ def create_app() -> FastAPI:
     app.include_router(accommodations_router, prefix=prefix)
 
     # -----------------------------------------------------------------------
-    # Health check
+    # Health check (no auth, no rate limit concern — simple liveness probe)
     # -----------------------------------------------------------------------
-    @app.get("/health", tags=["ops"], summary="Health check")
+    @app.get(
+        "/health",
+        tags=["ops"],
+        summary="Liveness probe",
+        include_in_schema=False,  # hide from public OpenAPI docs
+    )
     async def health() -> dict[str, str]:
         return {"status": "ok"}
 
