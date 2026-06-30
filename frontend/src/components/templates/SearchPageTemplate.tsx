@@ -29,7 +29,7 @@ export function SearchPageTemplate() {
       <SearchHero
         onSearch={handleSearch}
         isLoading={isSearching}
-        className="pt-16" // offset for fixed navbar
+        className="pt-32 pb-16" // offset for fixed navbar (h-16) + breathing room
       />
 
       {/* Results */}

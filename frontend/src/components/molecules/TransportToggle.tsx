@@ -17,9 +17,9 @@ interface TransportOption {
 }
 
 const OPTIONS: TransportOption[] = [
-  { type: "flight",        label: "Vuelo",        Icon: PlaneIcon },
-  { type: "train",         label: "Tren",          Icon: TrainIcon },
-  { type: "accommodation", label: "Alojamiento",   Icon: HotelIcon },
+  { type: "flight", label: "Vuelo", Icon: PlaneIcon },
+  { type: "train", label: "Tren", Icon: TrainIcon },
+  { type: "accommodation", label: "Alojamiento", Icon: HotelIcon },
 ];
 
 interface TransportToggleProps {

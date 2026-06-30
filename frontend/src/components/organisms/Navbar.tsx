@@ -47,7 +47,7 @@ export function Navbar() {
         </Link>
 
         {/* Nav links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6 whitespace-nowrap flex-shrink-0">
           {["Vuelos", "Trenes", "Hoteles", "Ofertas"].map((item) => (
             <Link
               key={item}
@@ -65,7 +65,7 @@ export function Navbar() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             variant={scrolled ? "ghost" : "ghost"}
             size="sm"

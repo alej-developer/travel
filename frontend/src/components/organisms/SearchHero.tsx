@@ -16,7 +16,6 @@
 import React, { useState, useId } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/atoms/Button";
-import { Input } from "@/components/atoms/Input";
 import { SearchIcon, LocationIcon, ArrowRightIcon } from "@/components/atoms/Icon";
 import { TransportToggle, type TransportType } from "@/components/molecules/TransportToggle";
 import { DatePickerField } from "@/components/molecules/DatePickerField";
@@ -87,194 +86,194 @@ export function SearchHero({ onSearch, isLoading = false, className }: SearchHer
   return (
     <section
       className={cn(
-        "w-full bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700",
-        "py-16 px-4 sm:px-6",
+        "relative w-full bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700",
+        "pt-32 pb-24 px-4 sm:px-6",
         className
       )}
     >
-      {/* Hero headline */}
-      <div className="max-w-5xl mx-auto text-center mb-10">
-        <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tightest text-balance leading-tight">
-          Tu próximo viaje,<br />
-          <span className="text-primary-100">al mejor precio</span>
-        </h1>
-        <p className="mt-3 text-primary-200 text-lg font-medium">
-          Compara vuelos, trenes y alojamientos en tiempo real
-        </p>
-      </div>
+      <div className="flex flex-col gap-10 w-full max-w-5xl mx-auto">
+        {/* Hero headline */}
+        <div className="text-center mt-4">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tightest text-balance leading-tight drop-shadow-sm">
+            Tu próximo viaje,<br />
+            <span className="text-primary-100">al mejor precio</span>
+          </h1>
+          <p className="mt-4 text-primary-100 text-lg sm:text-xl font-medium drop-shadow-sm">
+            Compara vuelos, trenes y alojamientos en tiempo real
+          </p>
+        </div>
 
-      {/* Search card */}
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        className="max-w-5xl mx-auto"
-        aria-label="Buscador de viajes"
-      >
-        <div className="bg-white rounded-3xl shadow-2xl overflow-visible">
-          {/* Transport toggle */}
-          <div className="px-6 pt-5 pb-0">
-            <TransportToggle value={transport} onChange={setTransport} />
-          </div>
-
-          {/* Search fields */}
-          <div className="p-3 sm:p-4">
-            <div className={cn(
-              "grid gap-0 bg-white rounded-2xl border border-neutral-200",
-              "shadow-search divide-y sm:divide-y-0 sm:divide-x divide-neutral-100",
-              "sm:grid-cols-[1fr_auto_1fr_1px_1fr_1px_1fr_1px_auto_auto]",
-              "md:grid-cols-[1fr_auto_1fr_1px_1fr_1px_1fr_1px_auto_auto]"
-            )}>
-
-              {/* ── Origin ────────────────────────────────────────────── */}
-              <div className="relative group">
-                <Input
-                  label="Origen"
-                  placeholder={isAccommodation ? "Ciudad" : "Aeropuerto o ciudad"}
-                  value={origin}
-                  onChange={(e) => {
-                    setOrigin(e.target.value);
-                    if (errors.origin) setErrors((p) => ({ ...p, origin: "" }));
-                  }}
-                  error={errors.origin}
-                  leftAdornment={<LocationIcon size="sm" />}
-                  className="border-0 shadow-none rounded-none focus:ring-0 bg-transparent h-auto py-3 pl-10"
-                  id={`${id}-origin`}
-                />
-              </div>
-
-              {/* ── Swap button ──────────────────────────────────────── */}
-              {!isAccommodation && (
-                <div className="flex items-center justify-center px-1 sm:px-0">
-                  <button
-                    type="button"
-                    onClick={handleSwap}
-                    aria-label="Intercambiar origen y destino"
-                    className={cn(
-                      "w-8 h-8 flex items-center justify-center",
-                      "rounded-full border-2 border-neutral-200 bg-white",
-                      "text-neutral-400 hover:text-neutral-600 hover:border-neutral-400",
-                      "transition-all duration-200 z-10",
-                      "hover:rotate-180 rotate-0"
-                    )}
-                    style={{ transition: "transform 0.3s ease, border-color 0.15s, color 0.15s" }}
-                  >
-                    <ArrowRightIcon size="xs" />
-                  </button>
-                </div>
-              )}
-
-              {/* ── Destination ───────────────────────────────────────── */}
-              <div className="relative group">
-                <Input
-                  label="Destino"
-                  placeholder={isAccommodation ? "Ciudad o dirección" : "Aeropuerto o ciudad"}
-                  value={destination}
-                  onChange={(e) => {
-                    setDestination(e.target.value);
-                    if (errors.destination) setErrors((p) => ({ ...p, destination: "" }));
-                  }}
-                  error={errors.destination}
-                  leftAdornment={<LocationIcon size="sm" />}
-                  className="border-0 shadow-none rounded-none focus:ring-0 bg-transparent h-auto py-3 pl-10"
-                  id={`${id}-destination`}
-                />
-              </div>
-
-              {/* Divider */}
-              <div className="hidden sm:block w-px bg-neutral-100 self-stretch" />
-
-              {/* ── Departure date ─────────────────────────────────────── */}
-              <DatePickerField
-                label={isAccommodation ? "Check-in" : "Salida"}
-                value={dateRange.range.startDate}
-                onChange={dateRange.setStartDate}
-                placeholder="Añadir fecha"
-                highlightRange={{
-                  start: dateRange.range.startDate,
-                  end: dateRange.range.endDate,
-                }}
-                className="min-w-[140px]"
-              />
-
-              {/* Divider */}
-              <div className="hidden sm:block w-px bg-neutral-100 self-stretch" />
-
-              {/* ── Return date ────────────────────────────────────────── */}
-              <DatePickerField
-                label={isAccommodation ? "Check-out" : "Regreso"}
-                value={dateRange.range.endDate}
-                onChange={dateRange.setEndDate}
-                placeholder="Añadir fecha"
-                minDate={dateRange.range.startDate ?? new Date()}
-                highlightRange={{
-                  start: dateRange.range.startDate,
-                  end: dateRange.range.endDate,
-                }}
-                className="min-w-[140px]"
-              />
-
-              {/* Divider */}
-              <div className="hidden sm:block w-px bg-neutral-100 self-stretch" />
-
-              {/* ── Passengers ─────────────────────────────────────────── */}
-              <PassengerSelector
-                counts={passengers.counts}
-                total={passengers.total}
-                label={passengers.label}
-                onIncrement={passengers.increment}
-                onDecrement={passengers.decrement}
-                canIncrement={passengers.canIncrement}
-                canDecrement={passengers.canDecrement}
-                className="min-w-[150px]"
-              />
-
-              {/* ── Search CTA ─────────────────────────────────────────── */}
-              <div className="flex items-center p-2">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  loading={isLoading}
-                  leftIcon={<SearchIcon size="sm" />}
-                  className="rounded-2xl h-14 px-6 min-w-[140px]"
-                  aria-label="Buscar viajes"
-                >
-                  Buscar
-                </Button>
-              </div>
+        {/* Search card */}
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="w-full relative z-10"
+          aria-label="Buscador de viajes"
+        >
+          <div className="bg-white rounded-3xl shadow-2xl overflow-visible max-w-[1100px] mx-auto">
+            {/* Transport toggle */}
+            <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-0">
+              <TransportToggle value={transport} onChange={setTransport} />
             </div>
 
-            {/* Error summary */}
-            {Object.keys(errors).length > 0 && (
-              <p className="mt-2 text-sm text-white/80 pl-2">
-                Por favor completa todos los campos requeridos.
-              </p>
-            )}
-          </div>
-        </div>
+            {/* Search fields */}
+            <div className="p-3 sm:p-4">
+              <div className={cn(
+                "flex flex-col lg:flex-row items-stretch w-full bg-white rounded-2xl border border-neutral-200",
+                "shadow-search divide-y lg:divide-y-0 lg:divide-x divide-neutral-100"
+              )}>
+                {/* ── Origin ────────────────────────────────────────────── */}
+                <div className="relative flex-1 flex flex-col items-start gap-0.5 px-4 py-3 hover:bg-neutral-50 transition-colors rounded-t-2xl lg:rounded-none lg:rounded-l-2xl">
+                  <label htmlFor={`${id}-origin`} className="text-2xs font-semibold text-neutral-400 uppercase tracking-wider cursor-pointer">
+                    Origen
+                  </label>
+                  <div className="flex items-center gap-2 w-full">
+                    <LocationIcon size="sm" className="text-neutral-400 flex-shrink-0" />
+                    <input
+                      id={`${id}-origin`}
+                      type="text"
+                      placeholder={isAccommodation ? "Ciudad" : "Aeropuerto o ciudad"}
+                      value={origin}
+                      onChange={(e) => {
+                        setOrigin(e.target.value);
+                        if (errors.origin) setErrors((p) => ({ ...p, origin: "" }));
+                      }}
+                      className={cn(
+                        "w-full bg-transparent border-0 p-0 text-base text-neutral-600 placeholder-neutral-300",
+                        "focus:outline-none focus:ring-0 truncate"
+                      )}
+                    />
+                  </div>
 
-        {/* Quick links */}
-        <div className="mt-4 flex flex-wrap gap-2 justify-center">
-          {["Madrid → Barcelona", "Valencia → Sevilla", "Bilbao → Málaga"].map((route) => {
-            const [from, to] = route.split(" → ");
-            return (
-              <button
-                key={route}
-                type="button"
-                onClick={() => { setOrigin(from); setDestination(to); }}
-                className={cn(
-                  "text-sm text-white/70 hover:text-white",
-                  "bg-white/10 hover:bg-white/20 backdrop-blur-sm",
-                  "px-3 py-1.5 rounded-pill",
-                  "transition-all duration-150 border border-white/10"
-                )}
-              >
-                {route}
-              </button>
-            );
-          })}
-        </div>
-      </form>
+                  {/* Swap button (desktop absolute, mobile hidden or separate) */}
+                  {!isAccommodation && (
+                    <button
+                      type="button"
+                      onClick={handleSwap}
+                      aria-label="Intercambiar origen y destino"
+                      className={cn(
+                        "hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10",
+                        "w-8 h-8 items-center justify-center rounded-full border-2 border-neutral-200 bg-white",
+                        "text-neutral-400 hover:text-neutral-600 hover:border-neutral-400",
+                        "transition-all duration-200 hover:rotate-180"
+                      )}
+                    >
+                      <ArrowRightIcon size="xs" />
+                    </button>
+                  )}
+                </div>
+
+                {/* ── Destination ───────────────────────────────────────── */}
+                <div className="relative flex-1 flex flex-col items-start gap-0.5 px-4 py-3 hover:bg-neutral-50 transition-colors">
+                  <label htmlFor={`${id}-destination`} className="text-2xs font-semibold text-neutral-400 uppercase tracking-wider cursor-pointer">
+                    Destino
+                  </label>
+                  <div className="flex items-center gap-2 w-full">
+                    <LocationIcon size="sm" className="text-neutral-400 flex-shrink-0" />
+                    <input
+                      id={`${id}-destination`}
+                      type="text"
+                      placeholder={isAccommodation ? "Ciudad o dirección" : "Aeropuerto o ciudad"}
+                      value={destination}
+                      onChange={(e) => {
+                        setDestination(e.target.value);
+                        if (errors.destination) setErrors((p) => ({ ...p, destination: "" }));
+                      }}
+                      className={cn(
+                        "w-full bg-transparent border-0 p-0 text-base text-neutral-600 placeholder-neutral-300",
+                        "focus:outline-none focus:ring-0 truncate"
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* ── Departure date ─────────────────────────────────────── */}
+                <DatePickerField
+                  label={isAccommodation ? "Check-in" : "Salida"}
+                  value={dateRange.range.startDate}
+                  onChange={dateRange.setStartDate}
+                  placeholder="Añadir fecha"
+                  highlightRange={{
+                    start: dateRange.range.startDate,
+                    end: dateRange.range.endDate,
+                  }}
+                  className="flex-1 lg:min-w-[140px] hover:bg-neutral-50 transition-colors"
+                />
+
+                {/* ── Return date ────────────────────────────────────────── */}
+                <DatePickerField
+                  label={isAccommodation ? "Check-out" : "Regreso"}
+                  value={dateRange.range.endDate}
+                  onChange={dateRange.setEndDate}
+                  placeholder="Añadir fecha"
+                  minDate={dateRange.range.startDate ?? new Date()}
+                  highlightRange={{
+                    start: dateRange.range.startDate,
+                    end: dateRange.range.endDate,
+                  }}
+                  className="flex-1 lg:min-w-[140px] hover:bg-neutral-50 transition-colors"
+                />
+
+                {/* ── Passengers ─────────────────────────────────────────── */}
+                <PassengerSelector
+                  counts={passengers.counts}
+                  total={passengers.total}
+                  label={passengers.label}
+                  onIncrement={passengers.increment}
+                  onDecrement={passengers.decrement}
+                  canIncrement={passengers.canIncrement}
+                  canDecrement={passengers.canDecrement}
+                  className="flex-1 lg:min-w-[150px] hover:bg-neutral-50 transition-colors"
+                />
+
+                {/* ── Search CTA ─────────────────────────────────────────── */}
+                <div className="flex items-center justify-center p-2 bg-neutral-50 lg:bg-transparent rounded-b-2xl lg:rounded-none lg:rounded-r-2xl">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    loading={isLoading}
+                    leftIcon={<SearchIcon size="sm" />}
+                    className="w-full lg:w-auto rounded-xl h-12 px-6 min-w-[120px]"
+                    aria-label="Buscar viajes"
+                  >
+                    Buscar
+                  </Button>
+                </div>
+              </div>
+
+              {/* Error summary */}
+              {Object.keys(errors).length > 0 && (
+                <p className="mt-2 text-sm text-primary-500 font-medium px-4 pb-2 text-center lg:text-left">
+                  Por favor completa todos los campos requeridos.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div className="mt-6 flex flex-wrap gap-2 justify-center px-4">
+            {["Madrid → Barcelona", "Valencia → Sevilla", "Bilbao → Málaga"].map((route) => {
+              const [from, to] = route.split(" → ");
+              return (
+                <button
+                  key={route}
+                  type="button"
+                  onClick={() => { setOrigin(from); setDestination(to); }}
+                  className={cn(
+                    "text-sm text-white hover:text-white",
+                    "bg-white/10 hover:bg-white/20 backdrop-blur-sm",
+                    "px-4 py-1.5 rounded-pill",
+                    "transition-all duration-150 border border-white/20"
+                  )}
+                >
+                  {route}
+                </button>
+              );
+            })}
+          </div>
+        </form>
+      </div>
     </section>
   );
 }
