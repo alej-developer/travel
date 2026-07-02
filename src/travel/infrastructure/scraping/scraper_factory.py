@@ -15,6 +15,9 @@ Usage
     # Or resolve by URL
     scraper = ScraperFactory.from_url("https://www.airbnb.com/s/Madrid/homes")
 
+    # Get scrapers for a specific transport type
+    domains = ScraperFactory.for_transport_type("train")
+
 Extending
 ---------
 To add a new provider, create a module in ``providers/`` implementing
@@ -28,16 +31,70 @@ import logging
 from typing import ClassVar
 
 from travel.infrastructure.scraping.base_scraper import BaseScraper
+
+# ── Existing providers ──────────────────────────────────────────────────────
 from travel.infrastructure.scraping.providers.airbnb import AirbnbScraper
 from travel.infrastructure.scraping.providers.booking import BookingScraper
 from travel.infrastructure.scraping.providers.iberia import IberiaScraper
 from travel.infrastructure.scraping.providers.renfe import RenfeScraper
+
+# ── New train providers ─────────────────────────────────────────────────────
+from travel.infrastructure.scraping.providers.trenes_com import TrenesComScraper
+from travel.infrastructure.scraping.providers.sncf import SncfScraper
+from travel.infrastructure.scraping.providers.trainline import TrainlineScraper
+from travel.infrastructure.scraping.providers.ouigo import OuigoScraper
+from travel.infrastructure.scraping.providers.iryo import IryoScraper
+
+# ── New flight providers ────────────────────────────────────────────────────
+from travel.infrastructure.scraping.providers.ryanair import RyanairScraper
+from travel.infrastructure.scraping.providers.vueling import VuelingScraper
+from travel.infrastructure.scraping.providers.easyjet import EasyJetScraper
+from travel.infrastructure.scraping.providers.skyscanner import SkyscannerScraper
+from travel.infrastructure.scraping.providers.google_flights import GoogleFlightsScraper
+
+# ── New accommodation providers ─────────────────────────────────────────────
+from travel.infrastructure.scraping.providers.vrbo import VrboScraper
+from travel.infrastructure.scraping.providers.ruralia import RuraliaScraper
+from travel.infrastructure.scraping.providers.escapada_rural import EscapadaRuralScraper
+from travel.infrastructure.scraping.providers.idealista import IdealistaScraper
+from travel.infrastructure.scraping.providers.trivago import TrivagoScraper
 
 logger = logging.getLogger(__name__)
 
 
 class UnknownProviderError(Exception):
     """Raised when no scraper is registered for the requested domain."""
+
+
+# ── Transport-type to domain mapping ────────────────────────────────────────
+
+_TRANSPORT_DOMAINS: dict[str, list[str]] = {
+    "train": [
+        "renfe.com",
+        "trenes.com",
+        "sncf-connect.com",
+        "thetrainline.com",
+        "ouigo.com",
+        "iryo.eu",
+    ],
+    "flight": [
+        "iberia.com",
+        "ryanair.com",
+        "vueling.com",
+        "easyjet.com",
+        "skyscanner.es",
+        "google.com/travel/flights",
+    ],
+    "accommodation": [
+        "booking.com",
+        "airbnb.com",
+        "vrbo.com",
+        "ruralia.com",
+        "escapadarural.com",
+        "idealista.com",
+        "trivago.es",
+    ],
+}
 
 
 class ScraperFactory:
@@ -49,10 +106,28 @@ class ScraperFactory:
     """
 
     _REGISTRY: ClassVar[dict[str, type[BaseScraper]]] = {
-        "booking.com":  BookingScraper,
-        "airbnb.com":   AirbnbScraper,
-        "renfe.com":    RenfeScraper,
-        "iberia.com":   IberiaScraper,
+        # ── Trains ──────────────────────────────────────────────────────────
+        "renfe.com":                  RenfeScraper,
+        "trenes.com":                 TrenesComScraper,
+        "sncf-connect.com":          SncfScraper,
+        "thetrainline.com":          TrainlineScraper,
+        "ouigo.com":                  OuigoScraper,
+        "iryo.eu":                    IryoScraper,
+        # ── Flights ─────────────────────────────────────────────────────────
+        "iberia.com":                 IberiaScraper,
+        "ryanair.com":                RyanairScraper,
+        "vueling.com":                VuelingScraper,
+        "easyjet.com":                EasyJetScraper,
+        "skyscanner.es":              SkyscannerScraper,
+        "google.com/travel/flights":  GoogleFlightsScraper,
+        # ── Accommodations ──────────────────────────────────────────────────
+        "booking.com":                BookingScraper,
+        "airbnb.com":                 AirbnbScraper,
+        "vrbo.com":                   VrboScraper,
+        "ruralia.com":                RuraliaScraper,
+        "escapadarural.com":          EscapadaRuralScraper,
+        "idealista.com":              IdealistaScraper,
+        "trivago.es":                 TrivagoScraper,
     }
 
     _INSTANCES: ClassVar[dict[str, BaseScraper]] = {}
@@ -126,3 +201,28 @@ class ScraperFactory:
     def available_domains(cls) -> list[str]:
         """Return sorted list of all registered provider domains."""
         return sorted(cls._REGISTRY.keys())
+
+    @classmethod
+    def for_transport_type(cls, transport_type: str) -> list[str]:
+        """Return the list of domains relevant to a transport type.
+
+        Parameters
+        ----------
+        transport_type:
+            One of ``"train"``, ``"flight"``, or ``"accommodation"``.
+
+        Returns
+        -------
+        list[str]
+            Sorted list of provider domains for this transport type.
+            Returns all domains if *transport_type* is not recognised.
+        """
+        transport_type = transport_type.lower().strip()
+        domains = _TRANSPORT_DOMAINS.get(transport_type)
+        if domains is None:
+            logger.warning(
+                "Unknown transport type %r — returning all domains", transport_type
+            )
+            return cls.available_domains()
+        # Only return domains that are actually registered
+        return sorted(d for d in domains if d in cls._REGISTRY)

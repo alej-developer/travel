@@ -78,6 +78,102 @@ export interface PaginatedResponse<T> {
   has_more: boolean;
 }
 
+// ─── Aggregated search types ────────────────────────────────────────────────
+
+export interface ProviderInfo {
+  domain: string;
+  display_name: string;
+}
+
+export interface ProviderResult {
+  provider: string;
+  provider_display_name: string;
+  price_raw: string | null;
+  price_cents: number | null;
+  currency: string;
+  departure_time: string | null;
+  arrival_time: string | null;
+  duration: string | null;
+  name: string | null;
+  operator: string | null;
+  extra: Record<string, unknown>;
+  url: string | null;
+}
+
+export interface AggregatedSearchResponse {
+  transport_type: TransportType;
+  origin: string;
+  destination: string;
+  date_from: string;
+  date_to: string | null;
+  providers_queried: string[];
+  providers_succeeded: string[];
+  providers_failed: string[];
+  results: ProviderResult[];
+  total_results: number;
+  search_timestamp: string;
+}
+
+export interface TriggerScrapingResponse {
+  task_id: string;
+  transport_type: string;
+  providers: string[];
+  provider_names: Record<string, string>;
+  status: string;
+}
+
+// ─── Provider display names (client-side fallback) ──────────────────────────
+
+export const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
+  // Trains
+  "renfe.com": "Renfe",
+  "trenes.com": "Trenes.com",
+  "sncf-connect.com": "SNCF Connect",
+  "thetrainline.com": "Trainline",
+  "ouigo.com": "Ouigo",
+  "iryo.eu": "Iryo",
+  // Flights
+  "iberia.com": "Iberia",
+  "ryanair.com": "Ryanair",
+  "vueling.com": "Vueling",
+  "easyjet.com": "EasyJet",
+  "skyscanner.es": "Skyscanner",
+  "google.com/travel/flights": "Google Flights",
+  // Accommodations
+  "booking.com": "Booking.com",
+  "airbnb.com": "Airbnb",
+  "vrbo.com": "Vrbo",
+  "ruralia.com": "Ruralia",
+  "escapadarural.com": "Escapada Rural",
+  "idealista.com": "Idealista",
+  "trivago.es": "Trivago",
+};
+
+export const PROVIDER_COLORS: Record<string, string> = {
+  // Trains
+  "renfe.com": "bg-purple-100 text-purple-700",
+  "trenes.com": "bg-blue-100 text-blue-700",
+  "sncf-connect.com": "bg-indigo-100 text-indigo-700",
+  "thetrainline.com": "bg-cyan-100 text-cyan-700",
+  "ouigo.com": "bg-pink-100 text-pink-700",
+  "iryo.eu": "bg-red-100 text-red-700",
+  // Flights
+  "iberia.com": "bg-red-100 text-red-700",
+  "ryanair.com": "bg-blue-100 text-blue-700",
+  "vueling.com": "bg-yellow-100 text-yellow-700",
+  "easyjet.com": "bg-orange-100 text-orange-700",
+  "skyscanner.es": "bg-sky-100 text-sky-700",
+  "google.com/travel/flights": "bg-green-100 text-green-700",
+  // Accommodations
+  "booking.com": "bg-blue-100 text-blue-700",
+  "airbnb.com": "bg-rose-100 text-rose-700",
+  "vrbo.com": "bg-indigo-100 text-indigo-700",
+  "ruralia.com": "bg-emerald-100 text-emerald-700",
+  "escapadarural.com": "bg-green-100 text-green-700",
+  "idealista.com": "bg-lime-100 text-lime-700",
+  "trivago.es": "bg-teal-100 text-teal-700",
+};
+
 // ─── Client factory ─────────────────────────────────────────────────────────
 
 function createApiClient(): AxiosInstance {
@@ -153,11 +249,46 @@ export const travelApi = {
     return data;
   },
 
-  /** Trigger background scraping for all providers */
-  triggerScraping: async (params: SearchParams): Promise<{ task_id: string }> => {
-    const { data } = await apiClient.post<{ task_id: string }>(
-      "/api/v1/scrape",
-      params
+  /** Aggregated search across all providers for a transport type */
+  searchAggregated: async (
+    params: SearchParams
+  ): Promise<AggregatedSearchResponse> => {
+    const { data } = await apiClient.post<AggregatedSearchResponse>(
+      "/api/v1/search",
+      {
+        origin: params.origin,
+        destination: params.destination,
+        date_from: params.date_from,
+        date_to: params.date_to,
+        passengers: params.passengers ?? 1,
+        transport_type: params.type ?? "flight",
+      }
+    );
+    return data;
+  },
+
+  /** Get available providers grouped by transport type */
+  getProviders: async (): Promise<Record<string, ProviderInfo[]>> => {
+    const { data } = await apiClient.get<Record<string, ProviderInfo[]>>(
+      "/api/v1/search/providers"
+    );
+    return data;
+  },
+
+  /** Trigger background scraping for the specified transport type */
+  triggerScraping: async (
+    params: SearchParams
+  ): Promise<TriggerScrapingResponse> => {
+    const { data } = await apiClient.post<TriggerScrapingResponse>(
+      "/api/v1/search/trigger",
+      {
+        origin: params.origin,
+        destination: params.destination,
+        date_from: params.date_from,
+        date_to: params.date_to,
+        passengers: params.passengers ?? 1,
+        transport_type: params.type ?? "flight",
+      }
     );
     return data;
   },
@@ -174,5 +305,8 @@ export const queryKeys = {
     params
       ? (["accommodations", params] as const)
       : (["accommodations"] as const),
+  search: (params?: SearchParams) =>
+    params ? (["search", params] as const) : (["search"] as const),
+  providers: () => (["providers"] as const),
   all: ["travel"] as const,
 } as const;

@@ -87,14 +87,14 @@ export function SearchHero({ onSearch, isLoading = false, className }: SearchHer
     <section
       className={cn(
         "relative w-full bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700",
-        "pt-32 pb-24 px-4 sm:px-6",
+        "pt-[10rem] pb-[7rem] px-4 sm:px-6",
         className
       )}
     >
-      <div className="flex flex-col gap-10 w-full max-w-5xl mx-auto">
+      <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
         {/* Hero headline */}
-        <div className="text-center mt-4">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tightest text-balance leading-tight drop-shadow-sm">
+        <div className="text-center">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tightest text-balance leading-tight drop-shadow-sm">
             Tu próximo viaje,<br />
             <span className="text-primary-100">al mejor precio</span>
           </h1>
@@ -252,7 +252,7 @@ export function SearchHero({ onSearch, isLoading = false, className }: SearchHer
           </div>
 
           {/* Quick links */}
-          <div className="mt-6 flex flex-wrap gap-2 justify-center px-4">
+          <div className="mt-4 flex flex-wrap gap-2 justify-center px-4">
             {["Madrid → Barcelona", "Valencia → Sevilla", "Bilbao → Málaga"].map((route) => {
               const [from, to] = route.split(" → ");
               return (

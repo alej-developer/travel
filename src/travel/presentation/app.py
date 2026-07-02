@@ -22,6 +22,7 @@ from travel.infrastructure.security.rate_limiter import RateLimitMiddleware
 from travel.infrastructure.security.security_headers import SecurityHeadersMiddleware
 from travel.presentation.api.v1.accommodations import router as accommodations_router
 from travel.presentation.api.v1.flights import router as flights_router
+from travel.presentation.api.v1.search import router as search_router
 from travel.presentation.api.v1.trains import router as trains_router
 
 
@@ -95,6 +96,7 @@ def create_app() -> FastAPI:
     app.include_router(flights_router, prefix=prefix)
     app.include_router(trains_router, prefix=prefix)
     app.include_router(accommodations_router, prefix=prefix)
+    app.include_router(search_router, prefix=prefix)
 
     # -----------------------------------------------------------------------
     # Health check (no auth, no rate limit concern — simple liveness probe)

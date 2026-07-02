@@ -1,6 +1,7 @@
 /**
  * ResultCard — Molecule
  * Unified card for Flight / Train / Accommodation results.
+ * Each card shows a provider badge indicating the source platform.
  */
 "use client";
 
@@ -11,8 +12,28 @@ import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
 import { PlaneIcon, TrainIcon, HotelIcon, StarIcon, ArrowRightIcon } from "@/components/atoms/Icon";
 import type { FlightResult, TrainResult, AccommodationResult } from "@/lib/api-client";
+import { PROVIDER_DISPLAY_NAMES, PROVIDER_COLORS } from "@/lib/api-client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+
+// ─── Provider Badge ─────────────────────────────────────────────────────────
+
+function ProviderBadge({ provider }: { provider?: string }) {
+  if (!provider) return null;
+  const displayName = PROVIDER_DISPLAY_NAMES[provider] ?? provider;
+  const colorClass = PROVIDER_COLORS[provider] ?? "bg-neutral-100 text-neutral-600";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-2xs font-semibold px-2 py-0.5 rounded-pill",
+        colorClass
+      )}
+    >
+      {displayName}
+    </span>
+  );
+}
 
 // ─── Flight Card ────────────────────────────────────────────────────────────
 
@@ -40,7 +61,10 @@ export function FlightCard({ data, onSelect }: FlightCardProps) {
           </div>
           <div>
             <p className="text-sm font-bold text-neutral-600">{data.airline}</p>
-            <p className="text-xs text-neutral-400">{data.flight_number}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs text-neutral-400">{data.flight_number}</p>
+              <ProviderBadge provider={(data.metadata?.provider as string) ?? undefined} />
+            </div>
           </div>
         </div>
 
@@ -115,9 +139,10 @@ export function TrainCard({ data, onSelect }: TrainCardProps) {
           </div>
           <div>
             <p className="text-sm font-bold text-neutral-600">{data.operator}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <Badge variant="accent" size="sm">{data.train_number}</Badge>
               <Badge variant="default" size="sm">{data.service_class}</Badge>
+              <ProviderBadge provider={(data.metadata?.provider as string) ?? undefined} />
             </div>
           </div>
         </div>
@@ -196,7 +221,10 @@ export function AccommodationCard({ data, onSelect }: AccommodationCardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold text-neutral-600 truncate">{data.name}</h3>
-            <p className="text-xs text-neutral-400 truncate">{data.city}, {data.country_code}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs text-neutral-400 truncate">{data.city}, {data.country_code}</p>
+              <ProviderBadge provider={(data.metadata?.provider as string) ?? undefined} />
+            </div>
           </div>
 
           {data.star_rating && (

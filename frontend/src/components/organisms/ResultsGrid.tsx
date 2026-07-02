@@ -19,7 +19,15 @@ import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
 import { FilterIcon, SpinnerIcon } from "@/components/atoms/Icon";
 import { FlightCard, TrainCard, AccommodationCard } from "@/components/molecules/ResultCard";
-import { travelApi, queryKeys, type SearchParams, type TransportType } from "@/lib/api-client";
+import {
+  travelApi,
+  queryKeys,
+  PROVIDER_DISPLAY_NAMES,
+  PROVIDER_COLORS,
+  type SearchParams,
+  type TransportType,
+} from "@/lib/api-client";
+import { ScraperFactory } from "@/lib/provider-config";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -73,7 +81,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 
 function InitialState() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
+    <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="w-20 h-20 rounded-full bg-primary-50 flex items-center justify-center mb-4">
         <SpinnerIcon size="xl" className="text-primary-300 animate-spin-slow" />
       </div>
@@ -95,6 +103,37 @@ function SkeletonGrid() {
       {Array.from({ length: 8 }).map((_, i) => (
         <CardSkeleton key={i} />
       ))}
+    </div>
+  );
+}
+
+// ─── Providers List ──────────────────────────────────────────────────────────
+
+function ProvidersList({ transport }: { transport: TransportType }) {
+  const providers = ScraperFactory.for_transport_type(transport);
+
+  return (
+    <div className="mb-6 p-4 bg-white rounded-2xl border border-neutral-100 shadow-sm">
+      <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+        Buscando en {providers.length} plataformas
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {providers.map((domain) => {
+          const displayName = PROVIDER_DISPLAY_NAMES[domain] ?? domain;
+          const colorClass = PROVIDER_COLORS[domain] ?? "bg-neutral-100 text-neutral-600";
+          return (
+            <span
+              key={domain}
+              className={cn(
+                "inline-flex items-center text-2xs font-semibold px-2.5 py-1 rounded-pill",
+                colorClass
+              )}
+            >
+              {displayName}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -208,6 +247,9 @@ export function ResultsGrid({ params, className }: ResultsGridProps) {
           )}
         </div>
       )}
+
+      {/* Provider list */}
+      {params && <ProvidersList transport={transport} />}
 
       {/* Content states */}
       {!params && <InitialState />}

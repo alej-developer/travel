@@ -240,3 +240,44 @@ def scrape_all_providers(request_dict: dict[str, Any]) -> Any:
         for domain in domains
     )
     return job.apply_async()
+
+
+# ---------------------------------------------------------------------------
+# Celery task: fan-out to providers filtered by transport type
+# ---------------------------------------------------------------------------
+
+@celery_app.task(
+    name="travel.worker.tasks.scrape_by_type",
+    acks_late=True,
+)
+def scrape_by_type(transport_type: str, request_dict: dict[str, Any]) -> Any:
+    """Fan out a scrape request only to providers matching the transport type.
+
+    Parameters
+    ----------
+    transport_type:
+        One of ``"train"``, ``"flight"``, or ``"accommodation"``.
+    request_dict:
+        JSON-serialisable dict matching :class:`ScrapeRequest` fields.
+
+    Returns
+    -------
+    GroupResult
+        Celery group result with one sub-task per matched provider.
+    """
+    domains = ScraperFactory.for_transport_type(transport_type)
+    logger.info(
+        "Fanning out %s scrape to %d providers: %s",
+        transport_type, len(domains), domains,
+    )
+
+    if not domains:
+        logger.warning("No providers registered for transport type %r", transport_type)
+        return None
+
+    job = group(
+        scrape_provider.s(domain, request_dict)
+        for domain in domains
+    )
+    return job.apply_async()
+

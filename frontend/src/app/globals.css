@@ -28,31 +28,54 @@
   --color-accent-900: #134e4a;
   --color-accent-950: #042f2e;
 
-  --shadow-search: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
-  --shadow-search-hover: 0 2px 4px rgba(0,0,0,0.12), 0 6px 20px rgba(0,0,0,0.10);
-  --shadow-card-hover: 0 6px 20px rgba(0,0,0,0.12), 0 3px 10px rgba(0,0,0,0.08);
+  --shadow-search: 0 2px 4px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-search-hover: 0 2px 4px rgba(0, 0, 0, 0.12), 0 6px 20px rgba(0, 0, 0, 0.10);
+  --shadow-card-hover: 0 6px 20px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
 
   --animate-fade-scale: fadeScale 0.25s ease-out forwards;
   --animate-fade-in: fadeIn 0.3s ease-out forwards;
   --animate-slide-down: slideDown 0.2s ease-out forwards;
-  
+
   --radius-pill: 9999px;
-  
+
   /* Font fallbacks for custom properties */
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
 @keyframes fadeScale {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
+
 @keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @keyframes slideDown {
-  0% { opacity: 0; transform: translateY(-8px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── CSS Custom Properties ─────────────────────────────────────────────── */
@@ -99,46 +122,52 @@
 }
 
 /* ─── Base resets ────────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer base {
 
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  scroll-behavior: smooth;
-}
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-body {
-  font-family: var(--font-inter);
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
-  line-height: 1.5;
-  min-height: 100vh;
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-inter);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
 }
 
 /* ─── Skeleton shimmer ───────────────────────────────────────────────────── */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg,
+      #f0f0f0 25%,
+      #e0e0e0 50%,
+      #f0f0f0 75%);
   background-size: 1000px 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 0.5rem;
 }
 
 @keyframes shimmer {
-  0%   { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
 /* ─── Focus visible utility ──────────────────────────────────────────────── */
@@ -153,17 +182,25 @@ body {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: var(--radius-pill);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-disabled);
 }
 
 /* ─── Typography utilities ───────────────────────────────────────────────── */
-.text-balance { text-wrap: balance; }
-.text-pretty  { text-wrap: pretty; }
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
